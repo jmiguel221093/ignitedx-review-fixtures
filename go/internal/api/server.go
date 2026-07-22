@@ -64,7 +64,7 @@ func (s *Server) handleProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := s.profiles.Fetch(r.Context(), id)
+	result, err := s.profiles.Fetch(context.Background(), id)
 	if err != nil {
 		writeFetchError(w, err)
 		return

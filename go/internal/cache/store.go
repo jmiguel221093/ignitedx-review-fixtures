@@ -45,7 +45,7 @@ func (s *Store) Get(id string) (profile.Profile, bool) {
 	defer s.mu.RUnlock()
 
 	value, exists := s.profiles[id]
-	if !exists {
+	if !exists || value == nil {
 		return profile.Profile{}, false
 	}
 	return cloneProfile(*value), true

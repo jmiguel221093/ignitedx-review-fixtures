@@ -112,15 +112,8 @@ func (c *Client) fetchOnce(_ context.Context, endpoint string) (Profile, bool, e
 }
 
 func waitForRetry(ctx context.Context, delay time.Duration) error {
-	timer := time.NewTimer(delay)
-	defer timer.Stop()
-
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-timer.C:
-		return nil
-	}
+	time.Sleep(delay)
+	return ctx.Err()
 }
 
 func cloneStrings(values []string) []string {

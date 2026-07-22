@@ -56,6 +56,9 @@ func (s *Store) MostRecent() (string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
+	if len(s.recentIDs) == 0 {
+		return "", false
+	}
 	return s.recentIDs[len(s.recentIDs)-1], true
 }
 

@@ -95,7 +95,7 @@ scenarios:
           strict: [high]
         maximum_active_occurrences: 1
       - id: GO-MAP-001
-        root_cause: a missing or nil map value is dereferenced without checking
+        root_cause: a reserved nil map value is dereferenced without checking
         oracle: TestOracle_GO_MAP_001_MissingProfileIsGuarded
         required: true
         allowed_severity:

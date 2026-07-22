@@ -26,7 +26,7 @@ type Runner struct{}
 // worker exits. The buffer prevents an abandoned consumer from trapping a
 // worker while cancellation propagates.
 func (Runner) Start(ctx context.Context, pending []Job) <-chan Result {
-	results := make(chan Result, len(pending))
+	results := make(chan Result)
 	var workers sync.WaitGroup
 	workers.Add(len(pending))
 
@@ -42,10 +42,7 @@ func (Runner) Start(ctx context.Context, pending []Job) <-chan Result {
 				result.Err = job.Run(ctx)
 			}
 
-			select {
-			case results <- result:
-			case <-ctx.Done():
-			}
+			results <- result
 		}()
 	}
 

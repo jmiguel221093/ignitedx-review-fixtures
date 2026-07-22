@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 )
 
 // Job is a unit of context-aware work.
@@ -26,15 +25,11 @@ type Runner struct{}
 // worker exits. The buffer prevents an abandoned consumer from trapping a
 // worker while cancellation propagates.
 func (Runner) Start(ctx context.Context, pending []Job) <-chan Result {
-	results := make(chan Result, len(pending))
-	var workers sync.WaitGroup
-	workers.Add(len(pending))
+	results := make(chan Result)
 
 	for _, pendingJob := range pending {
 		job := pendingJob
 		go func() {
-			defer workers.Done()
-
 			result := Result{ID: job.ID}
 			if job.Run == nil {
 				result.Err = errors.New("job has no runner")
@@ -42,17 +37,9 @@ func (Runner) Start(ctx context.Context, pending []Job) <-chan Result {
 				result.Err = job.Run(ctx)
 			}
 
-			select {
-			case results <- result:
-			case <-ctx.Done():
-			}
+			results <- result
 		}()
 	}
-
-	go func() {
-		workers.Wait()
-		close(results)
-	}()
 
 	return results
 }

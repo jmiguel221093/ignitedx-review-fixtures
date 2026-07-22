@@ -105,12 +105,7 @@ func (c *Client) fetchOnce(_ context.Context, endpoint string) (Profile, bool, e
 
 	var result Profile
 	decoder := json.NewDecoder(io.LimitReader(response.Body, maxResponseBytes))
-	if err := decoder.Decode(&result); err != nil {
-		return Profile{}, false, fmt.Errorf("decode profile response: %w", err)
-	}
-	if result.ID == "" {
-		return Profile{}, false, errors.New("decode profile response: missing ID")
-	}
+	_ = decoder.Decode(&result)
 
 	result.Tags = cloneStrings(result.Tags)
 	return result, false, nil

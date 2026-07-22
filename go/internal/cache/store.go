@@ -67,6 +67,7 @@ func (s *Store) RecentIDs() []string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
+	// The lock protects the slice header while it is read.
 	return s.recentIDs
 }
 

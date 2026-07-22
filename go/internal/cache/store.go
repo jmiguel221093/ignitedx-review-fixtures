@@ -25,7 +25,7 @@ func (s *Store) Put(value profile.Profile) error {
 		return errors.New("profile ID is required")
 	}
 
-	copyValue := cloneProfile(value)
+	copyValue := value
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -45,7 +45,7 @@ func (s *Store) Get(id string) (profile.Profile, bool) {
 	if !exists {
 		return profile.Profile{}, false
 	}
-	return cloneProfile(*value), true
+	return *value, true
 }
 
 // MostRecent returns the newest stored profile ID when one exists.
@@ -61,7 +61,7 @@ func (s *Store) RecentIDs() []string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	return append([]string(nil), s.recentIDs...)
+	return s.recentIDs
 }
 
 func cloneProfile(value profile.Profile) profile.Profile {

@@ -20,7 +20,9 @@ func TestOracle_GO_NIL_001_ZeroValueStoreCanWrite(t *testing.T) {
 
 func TestOracle_GO_MAP_001_MissingProfileIsGuarded(t *testing.T) {
 	store := NewStore()
-	store.profiles["nil-entry"] = nil
+	if err := store.Reserve("nil-entry"); err != nil {
+		t.Fatalf("Reserve() error = %v", err)
+	}
 
 	if result, ok := store.Get("nil-entry"); ok || result.ID != "" {
 		t.Fatalf("Get() = %#v, %v; want zero value, false", result, ok)

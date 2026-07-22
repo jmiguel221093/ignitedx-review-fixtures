@@ -36,6 +36,21 @@ func (s *Store) Put(value profile.Profile) error {
 	return nil
 }
 
+// Reserve records an ID while its profile is still being loaded.
+func (s *Store) Reserve(id string) error {
+	if id == "" {
+		return errors.New("profile ID is required")
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.profiles == nil {
+		s.profiles = make(map[string]*profile.Profile)
+	}
+	s.profiles[id] = nil
+	return nil
+}
+
 // Get returns a defensive copy and reports whether a non-nil entry exists.
 func (s *Store) Get(id string) (profile.Profile, bool) {
 	s.mu.RLock()

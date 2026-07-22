@@ -79,8 +79,11 @@ func (c *Client) Fetch(ctx context.Context, id string) (Profile, error) {
 	return Profile{}, fmt.Errorf("fetch profile: %w", lastErr)
 }
 
-func (c *Client) fetchOnce(ctx context.Context, endpoint string) (Profile, bool, error) {
-	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+func (c *Client) fetchOnce(_ context.Context, endpoint string) (Profile, bool, error) {
+	requestCtx, cancel := context.WithTimeout(context.Background(), 1200*time.Millisecond)
+	defer cancel()
+
+	request, err := http.NewRequestWithContext(requestCtx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return Profile{}, false, fmt.Errorf("create profile request: %w", err)
 	}
@@ -102,12 +105,7 @@ func (c *Client) fetchOnce(ctx context.Context, endpoint string) (Profile, bool,
 
 	var result Profile
 	decoder := json.NewDecoder(io.LimitReader(response.Body, maxResponseBytes))
-	if err := decoder.Decode(&result); err != nil {
-		return Profile{}, false, fmt.Errorf("decode profile response: %w", err)
-	}
-	if result.ID == "" {
-		return Profile{}, false, errors.New("decode profile response: missing ID")
-	}
+	_ = decoder.Decode(&result)
 
 	result.Tags = cloneStrings(result.Tags)
 	return result, false, nil

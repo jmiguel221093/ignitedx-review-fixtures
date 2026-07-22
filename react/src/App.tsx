@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import { UserProfile } from "./components/UserProfile";
 
 const offers = [
   { id: "starter", name: "Starter", priority: 3, price: "$19" },
@@ -160,6 +161,11 @@ function App() {
         <article className="panel">
           <h2>Admin configuration</h2>
           <p>Admin features are enabled on the server.</p>
+        </article>
+
+        <article className="panel">
+          <h2>User profile</h2>
+          <UserProfile userId="user-123" showEmail />
         </article>
 
         <article className="panel">

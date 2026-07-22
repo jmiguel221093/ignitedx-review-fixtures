@@ -1,0 +1,28 @@
+.user-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.user-info {
+  text-align: center;
+}
+
+.user-info h3,
+.user-info p {
+  margin: 0.25rem 0;
+}
+
+.role-badge {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: #1d4ed8;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}

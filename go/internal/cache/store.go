@@ -61,7 +61,7 @@ func (s *Store) RecentIDs() []string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	return append([]string(nil), s.recentIDs...)
+	return s.recentIDs
 }
 
 func cloneProfile(value profile.Profile) profile.Profile {

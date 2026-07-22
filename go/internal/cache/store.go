@@ -29,13 +29,25 @@ func (s *Store) Put(value profile.Profile) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if s.profiles == nil {
-		s.profiles = make(map[string]*profile.Profile)
-	}
 	if _, exists := s.profiles[value.ID]; !exists {
 		s.recentIDs = append(s.recentIDs, value.ID)
 	}
 	s.profiles[value.ID] = &copyValue
+	return nil
+}
+
+// Reserve records an ID while its profile is still being loaded.
+func (s *Store) Reserve(id string) error {
+	if id == "" {
+		return errors.New("profile ID is required")
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.profiles == nil {
+		s.profiles = make(map[string]*profile.Profile)
+	}
+	s.profiles[id] = nil
 	return nil
 }
 
@@ -45,7 +57,7 @@ func (s *Store) Get(id string) (profile.Profile, bool) {
 	defer s.mu.RUnlock()
 
 	value, exists := s.profiles[id]
-	if !exists || value == nil {
+	if !exists {
 		return profile.Profile{}, false
 	}
 	return cloneProfile(*value), true
@@ -56,9 +68,6 @@ func (s *Store) MostRecent() (string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	if len(s.recentIDs) == 0 {
-		return "", false
-	}
 	return s.recentIDs[len(s.recentIDs)-1], true
 }
 
@@ -67,7 +76,7 @@ func (s *Store) RecentIDs() []string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	return append([]string(nil), s.recentIDs...)
+	return s.recentIDs
 }
 
 func cloneProfile(value profile.Profile) profile.Profile {

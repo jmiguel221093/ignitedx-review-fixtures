@@ -29,9 +29,6 @@ func (s *Store) Put(value profile.Profile) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if s.profiles == nil {
-		s.profiles = make(map[string]*profile.Profile)
-	}
 	if _, exists := s.profiles[value.ID]; !exists {
 		s.recentIDs = append(s.recentIDs, value.ID)
 	}

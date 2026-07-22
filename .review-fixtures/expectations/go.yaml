@@ -1,0 +1,123 @@
+schema_version: 1
+fixture: go
+baseline_branch: develop
+commands:
+  standard:
+    - gofmt -l .
+    - go vet ./...
+    - go test ./...
+  oracle:
+    - go test -tags fixture_oracle ./...
+
+duplicate_policy:
+  identity: expectation_id
+  maximum_active_occurrences_per_pull_request: 1
+  prohibit_cross_review_clones: true
+  resolved_findings_must_not_be_resurrected: true
+
+scenarios:
+  - id: GO-ERRORS
+    branch: fixture/go/ignored-errors-lost-context
+    findings:
+      - id: GO-ERR-001
+        root_cause: downstream HTTP request is created without the caller context
+        oracle: TestOracle_GO_ERR_001_RequestContextPropagates
+        required: true
+        allowed_severity:
+          relaxed: [medium]
+          balanced: [medium]
+          strict: [medium]
+        maximum_active_occurrences: 1
+      - id: GO-ERR-002
+        root_cause: malformed upstream JSON is returned as a successful zero-value profile
+        oracle: TestOracle_GO_ERR_002_DecodeFailureIsReturned
+        required: true
+        allowed_severity:
+          relaxed: [medium]
+          balanced: [medium]
+          strict: [medium]
+        maximum_active_occurrences: 1
+
+  - id: GO-CONTEXT
+    branch: fixture/go/context-cancellation
+    findings:
+      - id: GO-CTX-001
+        root_cause: retry delay does not stop when the caller context is cancelled
+        oracle: TestOracle_GO_CTX_001_RetryWaitHonorsCancellation
+        required: true
+        allowed_severity:
+          relaxed: [low, medium]
+          balanced: [medium]
+          strict: [medium]
+        maximum_active_occurrences: 1
+      - id: GO-CTX-002
+        root_cause: request-scoped work replaces the caller context with a background context
+        oracle: TestOracle_GO_CTX_002_RequestContextReachesProfileFetcher
+        required: true
+        allowed_severity:
+          relaxed: [medium]
+          balanced: [medium]
+          strict: [medium]
+        maximum_active_occurrences: 1
+
+  - id: GO-CONCURRENCY
+    branch: fixture/go/goroutine-channel-leak
+    findings:
+      - id: GO-CONC-001
+        root_cause: worker can block sending a result after the caller cancels
+        oracle: TestOracle_GO_CONC_001_CancellationClosesResults
+        required: true
+        allowed_severity:
+          relaxed: [medium]
+          balanced: [medium, high]
+          strict: [medium, high]
+        maximum_active_occurrences: 1
+      - id: GO-CONC-002
+        root_cause: the result producer does not close its channel after all workers exit
+        oracle: TestOracle_GO_CONC_002_ProducerClosesResults
+        required: true
+        allowed_severity:
+          relaxed: [medium, high]
+          balanced: [medium, high]
+          strict: [medium, high]
+        maximum_active_occurrences: 1
+
+  - id: GO-COLLECTIONS
+    branch: fixture/go/nil-map-slice-hazards
+    findings:
+      - id: GO-NIL-001
+        root_cause: writing through a zero-value store can assign into a nil map
+        oracle: TestOracle_GO_NIL_001_ZeroValueStoreCanWrite
+        required: true
+        allowed_severity:
+          relaxed: [high]
+          balanced: [high]
+          strict: [high]
+        maximum_active_occurrences: 1
+      - id: GO-MAP-001
+        root_cause: a missing or nil map value is dereferenced without checking
+        oracle: TestOracle_GO_MAP_001_MissingProfileIsGuarded
+        required: true
+        allowed_severity:
+          relaxed: [medium, high]
+          balanced: [medium, high]
+          strict: [medium, high]
+        maximum_active_occurrences: 1
+      - id: GO-SLICE-001
+        root_cause: the most-recent element is indexed without checking for an empty slice
+        oracle: TestOracle_GO_SLICE_001_EmptyRecentListIsGuarded
+        required: true
+        allowed_severity:
+          relaxed: [medium, high]
+          balanced: [medium, high]
+          strict: [medium, high]
+        maximum_active_occurrences: 1
+      - id: GO-SLICE-002
+        root_cause: mutable slices expose store-owned backing arrays to callers
+        oracle: TestOracle_GO_SLICE_002_StoreReturnsDefensiveCopies
+        required: false
+        allowed_severity:
+          relaxed: [suggestion]
+          balanced: [suggestion, low]
+          strict: [low]
+        maximum_active_occurrences: 1
